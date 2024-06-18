@@ -35,6 +35,7 @@ const createUser = async (account) => {
     return await user.save();
 };
 
+
 const getByEmail = async (email) => {
     return await User.findOne({ email });
   };
