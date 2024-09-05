@@ -101,12 +101,11 @@ const User = mongoose.model("User", userSchema, "users");
 
 
 const createUser = async (account) => {
-    console.log("In createUser: ",account);
     const user = new User(account);
     return await user.save();
 };
 const editUser = async (_id, account) => {
-  console.log("I'm in edit user and the updated user is:", account)
+  console.log("I'm in edit user and the updated user is:", account);
   return await User.updateOne({_id}, account);
 };
 
@@ -134,7 +133,7 @@ const getByEmail = async (email) => {
   };
 
   const getCompanyByName = async (query) => {
-    console.log(query)
+    console.log(query);
     const regex = new RegExp(query, 'i');
     return await User.find({type: 'company',name: {$regex: regex}});
 

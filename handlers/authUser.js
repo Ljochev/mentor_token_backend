@@ -1,5 +1,18 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const crypto = require('node:crypto');
+const sendEmail = require('../sendEmail.js');
+
+
+
+
+
+const {
+  newUserValidate,
+  updateUserValidate,
+  updatePasswordValidate,
+  validateUser,
+} = require("../pkg/user/validateUser.js");
 
 
 const {
@@ -17,7 +30,6 @@ const {
 
 
 const register =  async (req, res) => {
-  console.log(req.body);
     const {
       name, 
       email, 
@@ -33,9 +45,9 @@ const register =  async (req, res) => {
       address = undefined, 
       jobsPosted = undefined
     } = req.body;
-      try {
-        console.log("First step in register");
 
+      try {
+        await validateUser(req.body, newUserValidate);
         const existsEmail = await getByEmail(email);
       // check if there is user registered with this email
       if (existsEmail) {
@@ -57,48 +69,23 @@ const register =  async (req, res) => {
       };
     };
 
-
-
-
-
-const registerr = async (req, res) => {
-    // se vrakja novo kreiraniot korisnik
-    // 
-    console.log(req.body);
-    const {
-      name, 
-      email, 
-      password, 
-      confirmPassword, 
-      type, 
-      phone, 
-      skills = undefined, 
-      desc = undefined, 
-      acceptedJobs = undefined, 
-      representative = undefined, 
-      address = undefined, 
-      jobsPosted = undefined
-    } = req.body;
-    try {
-      const existsEmail = await getByEmail(email);
-      // check if there is user registered with this email
-      if (existsEmail) {
-        return res.status(400).send({ message: "Account with this email already exists!" });
+   
+    
+    const updateUser =  async (req, res) => {
+      try {
+        await validateUser(req.body, updateUserValidate);
+        console.log("Message from updateUser: ", req.body);
+        const user = await editUser(req.auth.id, req.body);
+        // check if there is user registered with this email
+        const updatedUser = await getById(req.auth.id);
+          return res.status(200).send(updatedUser);
+      } catch (err) {
+        console.log(err);
+        return res.status(500).send({ error: "Internal Server Error" });
       }
-     
-      if (password !== confirmPassword) {
-        return res
-          .status(400)
-          .send({ message: "Confirm password is not the same as password!" });
-      }
-      req.body.password = bcrypt.hashSync(password); // password-ot e sifriran i e nerazbirliv za nas lugjeto
-      const acc = await createUser(req.body);
-      return res.status(201).send(acc);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({ error: "Internal Server Error" });
-    };
-  };
+    };  
+
+
 
   const login = async (req, res) => {
     console.log("I'm in login");
@@ -132,13 +119,120 @@ const registerr = async (req, res) => {
     try {
       const existsEmail = await getByEmail(email);
       // check if there is user registered with this email
-      console.log("Message from getByEmail: ", existsEmail);
       if (existsEmail) {
         // return res.status(200).send({ message: true });
         return res.status(200).send(true);
       } else {
         return res.status(200).send(false);
       }
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ error: "Internal Server Error" });
+    }
+  };
+
+  const passwordLink = async (req, res) => {
+    const {email} = req.body;
+    try {
+      const existsEmail = await getByEmail(email);
+      // check if there is user registered with this email
+      if (existsEmail) {
+
+          const objectData = {
+            id: existsEmail._id,
+            exp: new Date().getTime() / 1000 + 15 * 60
+          }
+
+        const key = crypto.createHash('sha512').update(process.env.aes_256_secret).digest('hex').substring(0,32);
+        const encIv = crypto.createHash('sha512').update(process.env.secretIV).digest('hex').substring(0,16);
+        
+          const cipher = crypto.createCipheriv(process.env.encMethod, key, encIv);
+          const encrypted = cipher.update(JSON.stringify(objectData), 'utf8', 'hex') + cipher.final('hex');
+          const token =  Buffer.from(encrypted).toString('base64');
+          const link =  `http://localhost:5173/passwordReset?resetToken=${token}`
+
+          const html = `
+          <p>
+        This is the html :
+        <a href=${link} target="_blank" title="Click to reset password">Click</a>
+    </p>
+          `;
+
+         const emailSendResponse = await sendEmail(
+          email,
+          "Mentor Token Password Reset",
+          "resetEmail",
+          token
+          );
+
+        return res.status(200).send(emailSendResponse);
+      } else {
+        return res.status(200).send(false);
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ error: "Internal Server Error" });
+    }
+  };
+
+  const checkResetEmail = async (req, res) => {
+    try {
+
+      const key = crypto.createHash('sha512').update(process.env.aes_256_secret).digest('hex').substring(0,32);
+        const encIv = crypto.createHash('sha512').update(process.env.secretIV).digest('hex').substring(0,16);
+        
+            const buff = Buffer.from(req.params.resetToken, 'base64')
+            const  newEncryptedData = buff.toString('utf-8')
+            const decipher = crypto.createDecipheriv(process.env.encMethod, key, encIv)
+            const decoded =  decipher.update(newEncryptedData, 'hex', 'utf8') + decipher.final('utf8')
+
+            const decodedParsed = JSON.parse(decoded);
+            const user = await getById(decodedParsed.id);
+
+        return res.status(200).send({email: user.email, exparation: decodedParsed.exp});
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ error: "Internal Server Error" });
+    }
+  };
+
+
+  const resetUserPassword = async (req, res) => {
+    try {
+      await validateUser(req.body, updatePasswordValidate);
+      const {newPassword, confirmNewPassword} = req.body
+
+      const key = crypto.createHash('sha512').update(process.env.aes_256_secret).digest('hex').substring(0,32);
+        const encIv = crypto.createHash('sha512').update(process.env.secretIV).digest('hex').substring(0,16);
+        
+            const buff = Buffer.from(req.params.resetToken, 'base64')
+            const  newEncryptedData = buff.toString('utf-8')
+            const decipher = crypto.createDecipheriv(process.env.encMethod, key, encIv)
+            const decoded =  decipher.update(newEncryptedData, 'hex', 'utf8') + decipher.final('utf8')
+
+            const decodedParsed = JSON.parse(decoded);
+
+            if (decodedParsed && decodedParsed.exp + 30 >= new Date().getTime()/1000) {
+              if (newPassword !== confirmNewPassword) {
+                return res
+                  .status(422)
+                  .send({ status: false,  message: "The passwords you entered do not match. Please try again." });
+              } else {
+              const user = await getById(decodedParsed.id);
+              if (bcrypt.compareSync(newPassword, user.password)) {
+                return res
+                  .status(422)
+                  .send({ status: false,  message: "New password cannot be the same as the old password! try again!" });
+              }
+                const newPasswordReset = bcrypt.hashSync(newPassword); // password-ot e sifriran i e nerazbirliv za nas lugjeto
+                const updatedUser = await editUser(decodedParsed.id,{password: newPasswordReset});
+                // console.log(updatedUser, "and the user is: ",user);
+                return res
+                .status(200)
+                .send({ status: true,  message: "Password has been updated, please login!" });
+
+              }
+            }
     } catch (err) {
       console.log(err);
       return res.status(500).send({ error: "Internal Server Error" });
@@ -158,18 +252,6 @@ const registerr = async (req, res) => {
     }
   };  
 
-  const updateUser =  async (req, res) => {
-    try {
-      console.log("Message from updateUser: ", req.body);
-      const user = await editUser(req.auth.id, req.body);
-      // check if there is user registered with this email
-      const updatedUser = await getById(req.auth.id);
-        return res.status(200).send(updatedUser);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({ error: "Internal Server Error" });
-    }
-  };  
 
   const getAllCompanies = async (req, res) => {
     console.log(req.query,"getAllCompanies")
@@ -237,6 +319,9 @@ const registerr = async (req, res) => {
 register,
 login,
 checkEmail,
+passwordLink,
+checkResetEmail,
+resetUserPassword,
 getUser,
 updateUser,
 getAllCompanies,

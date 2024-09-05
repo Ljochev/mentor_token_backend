@@ -2,14 +2,18 @@ require('dotenv').config();
 
 const express = require("express");
 const cors = require('cors');
+const path = require('path');
 const { expressjwt: jwt } = require("express-jwt");
 
 const {
     register,
     login,
     checkEmail,
+    passwordLink,
+    checkResetEmail,
+    resetUserPassword,
     getUser,
-    updateUser,
+    updateUser,  
     getAllCompanies,
     getAllMentors,
     getUserMentorName,
@@ -57,6 +61,8 @@ const {
 require("./pkg/db/index");
 
 const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
+app.set("view engine", "ejs");
 app.use(cors());
 
 app.use(express.json());
@@ -70,7 +76,10 @@ app.use(
             // routes that do not require authentication
             "/api/user/register",
             "/api/user/login",
-            "/api/user/checkEmail"
+            "/api/user/checkEmail",
+            "/api/user/passwordResetLink",
+            { url: /^\/api\/user\/checkResetToken\/.*/, methods: ['GET'] },
+            { url: /^\/api\/user\/resetPassword\/.*/, methods: ['PUT'] },
         ],
     })
 );
@@ -78,8 +87,12 @@ app.use(
 
 // registration, authentication, and authorization routes
 app.post("/api/user/register", register);
-app.post("/api/user/checkEmail", checkEmail);
 app.post("/api/user/login", login);
+app.post("/api/user/checkEmail", checkEmail);
+app.post("/api/user/passwordResetLink", passwordLink);
+app.get("/api/user/checkResetToken/:resetToken", checkResetEmail);
+app.put("/api/user/resetPassword/:resetToken", resetUserPassword);
+app.put("/api/user", updateUser);
 app.get("/api/user", getUser);
 app.get("/api/user/mentor/:name", getUserCompanyName);
 app.get("/api/user/company/:name", getUserMentorName);
@@ -87,7 +100,6 @@ app.get("/api/user/companies", getAllCompanies);
 app.get("/api/user/companyId/:_id", getCompanyById);
 app.get("/api/user/mentorId/:_id", getMentorById);
 app.get("/api/user/mentors", getAllMentors);
-app.put("/api/user", updateUser);
 
 // job routes
 app.post("/api/job", createJob);

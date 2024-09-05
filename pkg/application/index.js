@@ -19,10 +19,10 @@ const applicationSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-            applicationType: {
-                type: String,
-                enum: ["mentorToCompany", "companyToMentor"],
-                required: true,
+        applicationType: {
+            type: String,
+            enum: ["mentorToCompany", "companyToMentor"],
+            required: true,
         },
         status: {
             type: String,

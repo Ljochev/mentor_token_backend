@@ -34,9 +34,6 @@ const createMentorJobAplication = async (req, res) => {
         applicationType: "mentorToCompany",
         acceptedStatus: "pending"
       });
-      // const aplication = await findApplication(req.auth.id);
-      // console.log("Checking mentor_ids: ", allJobs[0].mentor_ids);
-      // !allJobs[0].mentor_ids[0] ? console.log("null") :  console.log("somenthing", allJobs[0].mentor_ids[0])
       return res.status(201).send({message: "Aplication was created"});
 
     }
@@ -104,7 +101,6 @@ const createMentorJobAplication = async (req, res) => {
       // await validate ({
       //     mentor_id: "required|string"
       // }, req.body);
-      console.log(req.params._id, "==> from editMentorJobAplication", req.body, " ==> and this is the body");
         // get the job aplication 
         let aplication = await findApplication(req.params._id);
         // update the aplication with req.body -> accepted, rejected
