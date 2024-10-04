@@ -9,13 +9,7 @@ const {
 } = require("../pkg/application/index.js");
 
 const {
-  jobCreate,
-  jobListIds,
-  jobList,
-  allJobsList,
-  jobDelete,
-  jobEdit,
-  oneJob,
+    oneJob,
 } = require("../pkg/jobs/index.js");
 
 const createMentorJobAplication = async (req, res) => {
@@ -25,8 +19,7 @@ const createMentorJobAplication = async (req, res) => {
       return res.status(201).send({message: "Aplication already created for this job"});
     } else {
       const job = await oneJob(req.params.jobId);
-      console.log(job);
-      const jobAplication = await createMentorApplication({
+      await createMentorApplication({
         jobId: job._id, 
         mentorId: req.auth.id, 
         companyId: job.companyId, 
@@ -35,7 +28,6 @@ const createMentorJobAplication = async (req, res) => {
         acceptedStatus: "pending"
       });
       return res.status(201).send({message: "Aplication was created"});
-
     }
       } catch (err) {
         console.log(err);
@@ -44,15 +36,13 @@ const createMentorJobAplication = async (req, res) => {
     };
   
   const listMentorJobAplication = async (req, res) => {
-    console.log("listMentorJobAplication : ", req.params, "<<params", req.query, "<<query");
     const filter = req.params.acceptedStatus === 'all' ? null : req.params.acceptedStatus;
-    // console.log("mentorId: ",req.auth.id , "acceptetStatus: ", filter )
     try {
       let allJobs = []
         if(req.params.mentorId === 'null') { 
-           allJobs = await listMentorApplication(req.auth.id, filter) 
+           allJobs = await listMentorApplication(req.auth.id, filter); 
         } else if(req.params.mentorId !== 'null'){
-           allJobs = await listMentorApplication(req.params.mentorId, filter)
+           allJobs = await listMentorApplication(req.params.mentorId, filter);
         }
           return res.status(201).send(allJobs);
         } catch (err) {
@@ -114,7 +104,6 @@ const createMentorJobAplication = async (req, res) => {
   };
 
   const findApppFromDate = async (req, res) => {
-
     try {
         // get the job aplication 
         let aplications = [];

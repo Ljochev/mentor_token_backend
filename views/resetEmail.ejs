@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Manrope:wght@200..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Poppins:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="test.css">
     <title>Password Reset</title>
     <%- await include('styles.ejs') %>
 </head>
@@ -18,18 +17,13 @@
             <span>MONITORING AND EVALUATING NOW IS EASY!</span>
             </div>
             <div class="message_section">
-
                 <p>Reset link will be valid for 15 minutes!</p>
-                
-                
                 <a href="http://localhost:5173/passwordReset?resetToken=<%= token %>" target="_blank" title="Click to reset password">
                     <div class="update_password_section">
                         <p>Password Reset</p>    
                     </div>
                 </a>
             </div>
-
-            
         <div class="log-page-logo">
             <div class="logo-class">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

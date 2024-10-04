@@ -4,7 +4,6 @@ const {
       listCompanyMentorAp,
       deleteCompanyApplication,
       updateCompanyApplication,
-      listApplication,
       findCompanyDateApp,
       findCompanyDirect,
       findPendingAplicationsJobId,
@@ -33,7 +32,6 @@ const {
       const filter = req.params.acceptedStatus === 'all' ? null : req.params.acceptedStatus;
       try {
             const allJobs = await listCompanyApplication(req.auth.id, filter);
-            // console.log("All company jobs : ", allJobs);
             return res.status(201).send(allJobs);
           } catch (err) {
             console.log(err);
@@ -63,11 +61,8 @@ const {
     };
     
     const editCompanyJobAplication = async (req, res) => {
-      console.log(req.body);
       try {
           const edited = await updateCompanyApplication(req.params._id, req.body);
-      console.log(edited);
-
             return res.status(201).send(edited);
           } catch (err) {
             console.log(err);

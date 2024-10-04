@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const applicationSchema = new mongoose.Schema(
     {
         jobId: {
@@ -41,7 +40,6 @@ const applicationSchema = new mongoose.Schema(
 )
 
 const Application = mongoose.model("Application", applicationSchema, "application");
-
 
 // mentor
 const createMentorApplication = async (job) => {

@@ -43,7 +43,6 @@ const listCompanyOpen = async (req, res) => {
 const listAllOpenJobs = async (req, res) => {
   try {
         const allJobs = await allOpenJobsList();
-        // console.log("All company jobs : ", allJobs);
         return res.status(201).send(allJobs);
       } catch (err) {
         console.log(err);
@@ -51,14 +50,9 @@ const listAllOpenJobs = async (req, res) => {
       }
 };
 
-
-
 const findJob = async (req, res) => {
-  console.log(req.params._id, "This are the params");
   try {
-      // console.log(req.params," this is params, and this : ", req.query, " is query!");
         const job = await oneJob(req.params._id);
-        // console.log("All company jobs : ", allJobs);
         return res.status(201).send(job);
       } catch (err) {
         console.log(err);
@@ -66,9 +60,7 @@ const findJob = async (req, res) => {
       }
 };
 
-
 const editJob = async (req, res) => {
-  console.log("EDITtttt");
   try {
       const jobEdited = await jobEdit(req.params.jobId, req.body);
         return res.status(201).send(jobEdited);
@@ -77,8 +69,6 @@ const editJob = async (req, res) => {
         return res.status(err.status).send(err.error);
       }
 };
-
-
 
   module.exports = {
     listJobsByIds,

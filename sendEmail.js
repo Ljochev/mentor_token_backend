@@ -29,7 +29,7 @@ const sendEmail = async (to, subject, template, token) => {
     // Send the email
     const info = await transport.sendMail(mailOptions);
 
-    console.log(`Email sent successfully. Info: ${JSON.stringify(info)}`);
+    // console.log(`Email sent successfully. Info: ${JSON.stringify(info)}`);
     return JSON.stringify(info);
   } catch (err) {
     console.error('Error sending email:', err);

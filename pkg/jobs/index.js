@@ -38,8 +38,6 @@ const jobSchema = new mongoose.Schema(
 
   const Job = mongoose.model("Job", jobSchema, "jobs");
 
-
-
 const jobCreate = async (job) => {
     const newJob = new Job(job);
     return await newJob.save();
@@ -65,9 +63,6 @@ const oneJob = async (_id) => {
   const jobEdit = async (_id, job) => {
     return await Job.updateOne({_id}, job);
   };
-
-
-
 
 module.exports = {
     jobCreate,

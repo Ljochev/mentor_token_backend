@@ -148,8 +148,6 @@ return await User.findOne({type: 'company',_id});
     
       };
   
-  
-
 module.exports = {
     createUser,
     getByEmail,
