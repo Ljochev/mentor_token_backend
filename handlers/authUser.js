@@ -2,11 +2,14 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const crypto = require('node:crypto');
 const sendEmail = require('../sendEmail.js');
+const sendMessage = require('../sendEmail.js');
+
 
 const {
   newUserValidate,
   updateUserValidate,
   updatePasswordValidate,
+  contactMessageValidate,
   validateUser,
 } = require("../pkg/user/validateUser.js");
 
@@ -292,6 +295,24 @@ const register =  async (req, res) => {
     }
   };
 
+  const contactMessage = async (req, res) => {
+    try {
+      await validateUser(req.body, contactMessageValidate);
+      const emailSendResponse = await sendMessage(
+        "ljochev@gmail.com",
+        "Mentor Token contact message",
+        "contactMessage",
+        data={
+          ...req.body
+        }
+        );
+        return res.status(200).send(emailSendResponse);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ error: "Internal Server Error" });
+    }
+  };
+
 
   module.exports = {
 register,
@@ -308,4 +329,5 @@ getUserMentorName,
 getUserCompanyName,
 getCompanyById,
 getMentorById,
+contactMessage,
   };

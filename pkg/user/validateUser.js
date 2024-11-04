@@ -45,7 +45,12 @@ const updateUserValidate = {
 const updatePasswordValidate = {
     newPassword: "required|string",
     confirmNewPassword: "required|string"
+};
 
+const contactMessageValidate = {
+    fullName: "required|string",
+    email: "required|string",
+    message: "required|string"
 };
 
 const validateUser = async (data, schema) => {
@@ -60,5 +65,6 @@ module.exports = {
     newUserValidate,
     updateUserValidate,
     updatePasswordValidate,
+    contactMessageValidate,
     validateUser,
 };

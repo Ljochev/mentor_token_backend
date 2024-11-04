@@ -20,6 +20,7 @@ const {
     getUserCompanyName,
     getCompanyById,
     getMentorById,
+    contactMessage,
 } = require("./handlers/authUser.js");
 
 const {
@@ -78,6 +79,7 @@ app.use(
             "/api/user/login",
             "/api/user/checkEmail",
             "/api/user/passwordResetLink",
+            "/api/contactMessage",
             { url: /^\/api\/user\/checkResetToken\/.*/, methods: ['GET'] },
             { url: /^\/api\/user\/resetPassword\/.*/, methods: ['PUT'] },
         ],
@@ -129,6 +131,10 @@ app.get("/api/company/dateApplications/:date", findCompanyApppFromDate);
 app.get("/api/directAplications/:mentorId", findCompanyToMentor);
 app.delete("/api/company/application/:_id", deleteCompanyJobAplication);
 app.put("/api/company/application/:_id", editCompanyJobAplication);
+
+// landing page
+app.post("/api/contactMessage", contactMessage);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
